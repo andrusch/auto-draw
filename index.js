@@ -1,5 +1,6 @@
 
-const calculateGrid = (connections, leftToRight = true) => {
+const calculateGrid = (nodes, edges, leftToRight = true) => {
+    const connections = edges.map(x => [x.source, x.target]);
     // Function to build a tree from connections using DFS
     function buildTree(connections, rootNode) {
         const tree = {};
@@ -27,7 +28,7 @@ const calculateGrid = (connections, leftToRight = true) => {
     }
 
     // Specify the root node
-    const rootNode = "A";
+    const rootNode = "__0__";
 
     // Build the tree
     const tree = buildTree(connections, rootNode);
@@ -62,9 +63,7 @@ const calculateGrid = (connections, leftToRight = true) => {
     const lowestX = Math.min(...Object.values(tree).map((node) => node.x));
     const highestX = Math.max(...Object.values(tree).map((node) => node.x));
     const width = highestX - lowestX + 1;
-    console.log(`Height: ${height}, Width: ${width}`);
-    console.log(`Lowest X: ${lowestX}, Highest X: ${highestX}`);
-    console.log(`Lowest Y: ${lowestY}, Highest Y: ${highestY}`);
+
     if (lowestX < 0) {
         for (const node of Object.values(tree)) {
             node.x -= lowestX;
@@ -80,9 +79,15 @@ const calculateGrid = (connections, leftToRight = true) => {
         node.y = 2 * node.y + 1;
     }
     if (leftToRight)
-        return Object.keys(tree).map(emoji => ({ emoji, x: tree[emoji].y, y: tree[emoji].x, label: emoji }));
+        return Object.keys(tree).map(emoji => {
+            const node = nodes.filter(x => x.key === emoji).shift();
+            return ({ emoji: node.emoji, x: tree[emoji].y, y: tree[emoji].x, label: node.label === node.emoji ? '' : node.label })
+        });
     else
-        return Object.keys(tree).map(emoji => ({ emoji, x: tree[emoji].x, y: tree[emoji].y, label: emoji }));
+        return Object.keys(tree).map(emoji => {
+            const node = nodes.filter(x => x.key === emoji).shift();
+            return ({ emoji: node.emoji, x: tree[emoji].x, y: tree[emoji].y, label: node.label === node.emoji ? '' : node.label })
+        });
 }
 
 
@@ -99,40 +104,60 @@ const printGrid = (grid) => {
 getNodesAndEdges = (text) => {
 
     const lines = text.trim().split('\n');
-    console.log(lines)
     // Initialize empty arrays for nodes and edges
     const nodes = [];
     const edges = [];
     const map = {};
-    const nodesLabelMap = {};
+    const nodeKeyMap = {};
+    const nodeLabelMap = {};
+    let node = 0;
 
     // Parse the syntax and populate the nodes and edges arrays
     lines.forEach((rule) => {
-        const parts = rule.split(/\s*->\s*/);
-        const source = parts[0];
-        const targetsAndLabel = parts[1].split(/\s*:\s*/);
-        const label = targetsAndLabel[1];
-        const targets = targetsAndLabel[0].split(/,\s*/); // Split multiple targets by comma and optional space
+        const rulePartsMatch = rule.match(/(.+?)\s*(?<g>->|=)\s*(.+)/);
+        if (!rulePartsMatch)
+            throw new Error(`Invalid syntax: ${rule}`);
+        else if (rulePartsMatch.groups.g === '->') {
+            const parts = rule.split(/\s*->\s*/);
+            const source = parts[0];
+            const targetsAndLabel = parts[1].split(/\s*:\s*/);
+            const label = targetsAndLabel[1];
+            const targets = targetsAndLabel[0].split(/,\s*/); // Split multiple targets by comma and optional space
 
-        // Add source node to the array of nodes if not already present
-        if (!nodes.includes(source)) {
-            map[source] = nodes.length;
-            nodes.push(source);
-        }
-
-        // Add target nodes to the array of nodes if not already present
-        targets.forEach((target) => {
-            if (!nodes.includes(target)) {
-                map[target] = nodes.length;
-                nodes.push(target);
+            if (!nodeKeyMap[source]) {
+                nodeKeyMap[source] = `__${node}__`;
+                node++;
             }
 
-            // Add edges with labels
-            edges.push({ source, target, sourceIndex: map[source], targetIndex: map[target], label });
-        });
-    });
+            // Add source node to the array of nodes if not already present
+            if (!nodes.includes(source)) {
+                map[source] = nodes.length;
+                nodes.push(source);
+            }
 
-    return { nodes, edges };
+            // Add target nodes to the array of nodes if not already present
+            targets.forEach((target) => {
+                if (!nodes.includes(target)) {
+                    map[target] = nodes.length;
+                    nodes.push(target);
+                }
+                if (!nodeKeyMap[target]) {
+                    nodeKeyMap[target] = `__${node}__`;
+                    node++;
+                }
+                // Add edges with labels
+                edges.push({ source: nodeKeyMap[source], target: nodeKeyMap[target], sourceIndex: map[source], targetIndex: map[target], label });
+            });
+        }
+        else if (rulePartsMatch.groups.g === '=') {
+            nodeLabelMap[rulePartsMatch[1]] = rulePartsMatch[3];
+        }
+    });
+    return {
+        nodes: nodes.map(a => {
+            return ({ emoji: a, key: nodeKeyMap[a], label: nodeLabelMap[a] ?? a })
+        }), edges
+    };
 };
 
 
@@ -275,7 +300,6 @@ const drawImg = (svg, data, connections) => {
         .attr('text-anchor', 'middle')
 
         .text((d) => d.label);
-    // console.log(connectionsWithLines);
     // Draw arrows with custom arrowhead and labels for connections
     svg
         .selectAll('line')
@@ -325,7 +349,6 @@ const drawImg = (svg, data, connections) => {
                 angle = angle > 360 ? angle % 360 : angle;
                 angle = angle < 0 ? 180 + angle : angle;
                 angle = angle > 90 ? angle - 180 : angle;
-                // console.log(angle);
                 const xoffset = 5 * (angle < 0 ? -1 : 1);
                 const yoffset = -5;
                 return `translate(${d.line.target.x + xoffset + 12}, ${d.line.target.y + yoffset - 12
@@ -356,7 +379,6 @@ const drawImg = (svg, data, connections) => {
             angle = angle > 360 ? angle % 360 : angle;
             angle = angle < 0 ? 180 + angle : angle;
             angle = angle > 90 ? angle - 180 : angle;
-            // console.log(angle);
             const xoffset = 5 * (angle < 0 ? -1 : 1);
             const yoffset = -5;
             return `translate(${d.line.center.x + xoffset}, ${d.line.center.y + yoffset
@@ -383,8 +405,6 @@ const showTextBg = false;
 // Add an event listener for the onChange event
 textarea.addEventListener("change", function () {
     // This function will be called when the textarea content changes
-    console.log(textarea.value);
-
     const svg = d3.select("#chart");
 
     // Remove the SVG element and its content from the DOM
@@ -404,19 +424,9 @@ textarea.addEventListener("change", function () {
 
 
 
-    //'A -> B: Slow.\nA -> C, D: Fast.\nE -> D: Great'
 
     const { nodes, edges } = getNodesAndEdges(textarea.value);
-    console.log(nodes);
-    console.log(edges);
-    // console.log(edges.map(x => [x.source, x.target]));
-    // calculateGrid([
-    //     ["A", "B"],
-    //     ["A", "C"],
-    //     ["A", "D"],
-    //     ["E", "D"],
-    // ]);
-    const data = calculateGrid(edges.map(x => [x.source, x.target]));
+    const data = calculateGrid(nodes, edges);
     const connections = edges.map(x => ({ source: x.sourceIndex, target: x.targetIndex, label: x.label }));
     // Sample data representing emojis and connections
     // const data = [
