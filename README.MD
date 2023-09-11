@@ -18,3 +18,13 @@ G -> W: Yes
 ```
 
 ![Example Diagram](./docs/imgs/example.png)
+
+Further, the syntax below displays the image below.
+
+```draw4m
+🏝️ -> 🎟️: Conn 1.
+🏝️ -> 🚀, 🎽: Fast!
+🐉 -> 🎽: Great
+```
+
+![Emoji Example](./docs/imgs/example2.png)

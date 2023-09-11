@@ -416,8 +416,8 @@ textarea.addEventListener("change", function () {
     // Create a new SVG element and add it to the container
     const newSvg = container.append("svg")
         .attr("id", "chart")
-        .attr("width", 10000)
-        .attr("height", 10000);
+        .attr("width", 1000)
+        .attr("height", 800);
 
 
 
