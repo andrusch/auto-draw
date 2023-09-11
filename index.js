@@ -75,8 +75,12 @@ const calculateGrid = (nodes, edges, leftToRight = true) => {
         }
     }
     for (const node of Object.values(tree)) {
-        node.x = 2 * node.x + 1;
-        node.y = 2 * node.y + 1;
+        node.x = node.x// + 5;
+        node.y = 2 * node.y// + 5;
+    }
+    for (const node of Object.values(tree)) {
+        node.x = node.x + 1// + 5;
+        node.y = node.y + 1// + 5;
     }
     if (leftToRight)
         return Object.keys(tree).map(emoji => {
@@ -150,12 +154,17 @@ getNodesAndEdges = (text) => {
             });
         }
         else if (rulePartsMatch.groups.g === '=') {
-            nodeLabelMap[rulePartsMatch[1]] = rulePartsMatch[3];
+            //<node_van>, <label>
+            const match = rulePartsMatch[3].split(/\s*:\s*/);
+            if (match.length > 1)
+                nodeLabelMap[rulePartsMatch[1]] = { label: match[1], emoji: match[0] };
+            else
+                nodeLabelMap[rulePartsMatch[1]] = { label: match[0] };
         }
     });
     return {
         nodes: nodes.map(a => {
-            return ({ emoji: a, key: nodeKeyMap[a], label: nodeLabelMap[a] ?? a })
+            return ({ emoji: nodeLabelMap[a]?.emoji ?? a, key: nodeKeyMap[a], label: nodeLabelMap[a]?.label ?? a })
         }), edges
     };
 };
@@ -230,6 +239,7 @@ const drawImg = (svg, data, connections) => {
             { source: 'top_left', target: 'bottom_right' },
             { source: 'bottom_right', target: 'top_left' },
             { source: 'bottom_left', target: 'middle_right' },
+            { source: 'middle_left', target: 'middle_right' },
         ];
 
         const lines = possibilities
@@ -261,6 +271,8 @@ const drawImg = (svg, data, connections) => {
         if ((angle === 0 || angle === 180) && (
             (line.sourceTag.includes('top_') && line.targetTag.includes('bottom_'))
             || (line.targetTag.includes('top_') && line.sourceTag.includes('bottom_'))
+            || (line.targetTag.includes('middle_') && line.sourceTag.includes('bottom_'))
+            || (line.sourceTag.includes('top_') && line.targetTag.includes('middle_'))
         )) {
             line = lines.shift();
         }
@@ -403,49 +415,42 @@ const textBgColor = 'red';
 const showTextBg = false;
 
 // Add an event listener for the onChange event
-textarea.addEventListener("change", function () {
-    // This function will be called when the textarea content changes
-    const svg = d3.select("#chart");
+textarea.addEventListener("keyup", function () {
+    try {
+        const { nodes, edges } = getNodesAndEdges(textarea.value);
+        const data = calculateGrid(nodes, edges);
+        const connections = edges.map(x => ({ source: x.sourceIndex, target: x.targetIndex, label: x.label }));
+        // Sample data representing emojis and connections
+        // const data = [
+        //     { emoji: '🏝️', label: 'Emoji 1', x: 1, y: 2.5 },
+        //     { emoji: '🎟️', label: 'Emoji 2', x: 3, y: 1 },
+        //     { emoji: '🚀', label: 'Emoji 3', x: 3, y: 2.5 },
+        //     { emoji: '🎽', label: 'Emoji 4', x: 3, y: 3.5 },
+        //     { emoji: '🐉', label: 'Emoji 5', x: 5, y: 3.5 },
+        // ];
 
-    // Remove the SVG element and its content from the DOM
-    svg.remove();
-
-    // Create a new container element to hold the SVG
-    const container = d3.select("body"); // Select an existing container element
-
-    // Create a new SVG element and add it to the container
-    const newSvg = container.append("svg")
-        .attr("id", "chart")
-        .attr("width", 1000)
-        .attr("height", 800);
-
-
-
-
-
-
-
-    const { nodes, edges } = getNodesAndEdges(textarea.value);
-    const data = calculateGrid(nodes, edges);
-    const connections = edges.map(x => ({ source: x.sourceIndex, target: x.targetIndex, label: x.label }));
-    // Sample data representing emojis and connections
-    // const data = [
-    //     { emoji: '🏝️', label: 'Emoji 1', x: 1, y: 2.5 },
-    //     { emoji: '🎟️', label: 'Emoji 2', x: 3, y: 1 },
-    //     { emoji: '🚀', label: 'Emoji 3', x: 3, y: 2.5 },
-    //     { emoji: '🎽', label: 'Emoji 4', x: 3, y: 3.5 },
-    //     { emoji: '🐉', label: 'Emoji 5', x: 5, y: 3.5 },
-    // ];
-
-    // const connections = [
-    //     { source: 0, target: 1, label: 'Connection 1' },
-    //     { source: 0, target: 2, label: 'Fast!' },
-    //     { source: 0, target: 3, label: 'Bad!' },
-    //     { source: 4, target: 3, label: 'Great!' },
-    // ];
-
-    drawImg(newSvg, data, connections);
+        // const connections = [
+        //     { source: 0, target: 1, label: 'Connection 1' },
+        //     { source: 0, target: 2, label: 'Fast!' },
+        //     { source: 0, target: 3, label: 'Bad!' },
+        //     { source: 4, target: 3, label: 'Great!' },
+        // ];
 
 
+        // This function will be called when the textarea content changes
+        const svg = d3.select("#chart");
+        // Remove the SVG element and its content from the DOM
+        svg.remove();
+        // Create a new container element to hold the SVG
+        const container = d3.select("body"); // Select an existing container element
+        // Create a new SVG element and add it to the container
+        const newSvg = container.append("svg")
+            .attr("id", "chart")
+            .attr("width", 1000)
+            .attr("height", 800);
+        drawImg(newSvg, data, connections);
+    } catch (e) {
+
+    }
 });
 

@@ -21,10 +21,30 @@ G -> W: Yes
 
 Further, the syntax below displays the image below.
 
-```draw4m
+```draw4me
 🏝️ -> 🎟️: Conn 1.
 🏝️ -> 🚀, 🎽: Fast!
 🐉 -> 🎽: Great
 ```
 
 ![Emoji Example](./docs/imgs/example2.png)
+
+You can also abbreviate the nodes and give them their own labels:
+
+```draw4me
+A = 😘: hi
+B = ❤️: hi
+C = ♠️: spade
+A -> B: Slow.
+A -> C, D: Fast.
+E -> D: Great
+D -> G: Hello
+G -> W: Yes
+```
+
+![Emojis With Labels](./docs/imgs/example3.png)
+
+## ToDo
+
+- The math for the arrows is slightly off. We should use the angle of between the two boxes of the grid to determine the best fit line.
+- The arrowhead needs to be pulled back within the bounding box. If you turn on the grid by setting 'showGrid', you can see how the arrows stretches across the box.
