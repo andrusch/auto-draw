@@ -397,6 +397,28 @@ const drawImg = (svg, data, connections) => {
                 }) rotate(${angle})`;
         })
         .text((d) => d.label);
+
+    svg.append("circle")
+        .attr("cx", 50)
+        .attr("cy", 50)
+        .attr("r", 20)
+        .attr("fill", "black");
+
+    // Add a Font Awesome icon inside the circle
+    svg.append('text')
+        .attr('text-anchor', 'middle')
+        .attr("x", 50)
+        .attr("y", 50)
+        .attr('dominant-baseline', 'central')
+        .attr('font-family', 'Font Awesome 5 Free')
+        .attr("class", "fa")
+
+        .attr("fill", "white")
+        .attr('font-weight', 900)
+        .attr('font-style', 'normal')
+        .text(function (d) {
+            return '\uf001';
+        });
 }
 
 
