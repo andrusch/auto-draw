@@ -48,3 +48,4 @@ G -> W: Yes
 
 - The math for the arrows is slightly off. We should use the angle of between the two boxes of the grid to determine the best fit line.
 - The arrowhead needs to be pulled back within the bounding box. If you turn on the grid by setting 'showGrid', you can see how the arrows stretches across the box.
+- Integrate [Linear Icons](https://linearicons.com/). It would be cool to do something like [ligatures](https://linearicons.com/#liga-font)
