@@ -86,6 +86,9 @@ Or with some emojis
 - Integrate [Linear Icons](https://linearicons.com/). It would be cool to do something like [ligatures](https://linearicons.com/#liga-font)
 - Give the ability to box the nodes and do it in a theme similar to AWS or Azure.
 - Give the option to do numbered connections rather than text above arrows.
+- Integrate YJS and the Monacao editor. 
+  - https://github.com/yjs/y-monaco
+  - https://docs.yjs.dev/ecosystem/editor-bindings/monaco
 
 ## Running Local
 
