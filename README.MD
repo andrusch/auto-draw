@@ -44,6 +44,41 @@ G -> W: Yes
 
 ![Emojis With Labels](./docs/imgs/example3.png)
 
+You can also use [Font Awesome](https://fontawesome.com/) to draw icons by pre-pending the tag with fa-.
+
+```draw4me
+A = fa-wrench:
+B = fa-wine-bottle: Red Red Wine
+C = 🍔: Paradise
+A -> B: Slow.
+A -> C, D: Fast.
+E -> D: Great
+D -> G: Hello
+G -> W: Yes
+```
+
+![A diagram with Font Awesome](./docs/imgs/fa.png)
+
+The diagram could be as simple as below:
+
+```draw4me
+A = Boy
+B = Unicorn
+A -> B: becomes
+```
+
+![A boy becomes a unicorn](./docs/imgs/simple1.png)
+
+Or with some emojis
+
+```draw4me
+👦 = Boy
+🦄 = Unicorn
+👦 -> 🦄: becomes
+```
+
+![A boy becomes a unicorn with emojis](./docs/imgs/simple2.png)
+
 ## ToDo
 
 - The math for the arrows is slightly off. We should use the angle of between the two boxes of the grid to determine the best fit line.
